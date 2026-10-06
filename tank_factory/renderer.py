@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pygame
 
 from .constants import (
@@ -16,12 +18,70 @@ from .constants import (
 from .entities import FactoryStatus, PartKind, PART_NAMES, PART_SHORT_NAMES
 from .factory import Factory
 
+ASSET_DIRECTORY = Path(__file__).resolve().parent.parent / "assets"
+PART_ASSET_FILES = {
+    PartKind.CHASSIS: "chassis.png",
+    PartKind.TURRET: "turret.png",
+    PartKind.CANNON: "cannon.png",
+}
+CONVEYOR_ASSET_FILES = {
+    (0, -1): "conveyor_up.png",
+    (1, 0): "conveyor_right.png",
+    (0, 1): "conveyor_down.png",
+    (-1, 0): "conveyor_left.png",
+}
+TILE_ASSET_FILES = {
+    "floor": "floor.png",
+    "wall": "wall.png",
+    "assembly": "assembly.png",
+}
+
 
 class Renderer:
     """Рисует меню, сетку цеха, панель состояния и финальный экран."""
 
     def __init__(self) -> None:
         self.fonts: dict[tuple[int, bool], pygame.font.Font] = {}
+        self.sprite_cache: dict[tuple[int, int, int], pygame.Surface] = {}
+        self.part_sprites = {
+            part_kind: image
+            for part_kind, filename in PART_ASSET_FILES.items()
+            if (image := self._load_asset(filename)) is not None
+        }
+        self.conveyor_sprites = {
+            direction: image
+            for direction, filename in CONVEYOR_ASSET_FILES.items()
+            if (image := self._load_asset(filename)) is not None
+        }
+        self.tile_sprites = {
+            tile_name: image
+            for tile_name, filename in TILE_ASSET_FILES.items()
+            if (image := self._load_asset(filename)) is not None
+        }
+        self.drone_sprite = self._load_asset("drone.png")
+
+    @staticmethod
+    def _load_asset(filename: str) -> pygame.Surface | None:
+        path = ASSET_DIRECTORY / filename
+        if not path.is_file():
+            return None
+        return pygame.image.load(str(path)).convert_alpha()
+
+    def _draw_sprite(self, surface: pygame.Surface, image: pygame.Surface, rect: pygame.Rect) -> None:
+        image_width, image_height = image.get_size()
+        scale = min(rect.width // image_width, rect.height // image_height)
+        if scale:
+            size = image_width * scale, image_height * scale
+        else:
+            factor = min(rect.width / image_width, rect.height / image_height)
+            size = max(1, round(image_width * factor)), max(1, round(image_height * factor))
+
+        cache_key = id(image), *size
+        scaled = self.sprite_cache.get(cache_key)
+        if scaled is None:
+            scaled = image if size == image.get_size() else pygame.transform.scale(image, size)
+            self.sprite_cache[cache_key] = scaled
+        surface.blit(scaled, scaled.get_rect(center=rect.center))
 
     def _font(self, size: int, bold: bool = False) -> pygame.font.Font:
         key = size, bold
@@ -172,6 +232,9 @@ class Renderer:
 
                 fill = PALETTE["cell_alt"] if (grid_x + grid_y) % 2 else PALETTE["cell"]
                 pygame.draw.rect(surface, fill, inset, border_radius=5)
+                floor_sprite = self.tile_sprites.get("floor")
+                if floor_sprite is not None:
+                    self._draw_sprite(surface, floor_sprite, inset)
                 conveyor = factory.conveyors.get(position)
                 if conveyor:
                     self._draw_conveyor(surface, inset, conveyor.direction_x, conveyor.direction_y)
@@ -180,23 +243,29 @@ class Renderer:
 
                 part = factory.get_part_at(position)
                 if part is not None:
-                    self._draw_part_icon(surface, part.kind, inset.inflate(-9, -9))
-                    self._text(
-                        surface,
-                        PART_SHORT_NAMES[part.kind],
-                        (inset.centerx, inset.bottom - 8),
-                        max(11, cell_size // 4),
-                        PALETTE["text"],
-                        True,
-                        centered=True,
-                    )
+                    has_sprite = self._draw_part_icon(surface, part.kind, inset.inflate(-5, -5))
+                    if not has_sprite:
+                        self._text(
+                            surface,
+                            PART_SHORT_NAMES[part.kind],
+                            (inset.centerx, inset.bottom - 8),
+                            max(11, cell_size // 4),
+                            PALETTE["text"],
+                            True,
+                            centered=True,
+                        )
                 if factory.drone.position == position:
-                    self._draw_drone(surface, inset, factory.drone.carried_part.kind if factory.drone.carried_part else None)
+                    carried_kind = factory.drone.carried_part.kind if factory.drone.carried_part else None
+                    self._draw_drone(surface, inset, carried_kind)
 
         pygame.draw.rect(surface, PALETTE["outline"], board_rect, width=1, border_radius=12)
 
     def _draw_wall(self, surface: pygame.Surface, rect: pygame.Rect) -> None:
         pygame.draw.rect(surface, PALETTE["wall"], rect, border_radius=5)
+        sprite = self.tile_sprites.get("wall")
+        if sprite is not None:
+            self._draw_sprite(surface, sprite, rect)
+            return
         inner = rect.inflate(-8, -8)
         pygame.draw.rect(surface, PALETTE["wall_dark"], inner, border_radius=4)
         pygame.draw.circle(surface, PALETTE["text_muted"], (rect.left + 8, rect.top + 8), 2)
@@ -204,6 +273,10 @@ class Renderer:
 
     def _draw_conveyor(self, surface: pygame.Surface, rect: pygame.Rect, direction_x: int, direction_y: int) -> None:
         pygame.draw.rect(surface, PALETTE["conveyor"], rect, border_radius=5)
+        sprite = self.conveyor_sprites.get((direction_x, direction_y))
+        if sprite is not None:
+            self._draw_sprite(surface, sprite, rect)
+            return
         center_x, center_y = rect.center
         start = center_x - direction_x * 11, center_y - direction_y * 11
         end = center_x + direction_x * 12, center_y + direction_y * 12
@@ -218,7 +291,12 @@ class Renderer:
 
     def _draw_assembly_tile(self, surface: pygame.Surface, rect: pygame.Rect, stack_size: int) -> None:
         pygame.draw.rect(surface, PALETTE["assembly"], rect, border_radius=6)
-        pygame.draw.rect(surface, PALETTE["assembly_light"], rect.inflate(-8, -8), width=2, border_radius=5)
+        sprite = self.tile_sprites.get("assembly")
+        if sprite is None:
+            pygame.draw.rect(surface, PALETTE["assembly_light"], rect.inflate(-8, -8), width=2, border_radius=5)
+        else:
+            self._draw_sprite(surface, sprite, rect)
+            pygame.draw.rect(surface, PALETTE["assembly_light"], rect, width=2, border_radius=5)
         self._text(surface, "СБОРКА", rect.center, max(10, rect.width // 4), PALETTE["text"], True, centered=True)
         slot_width = max(5, (rect.width - 20) // 3)
         for index in range(3):
@@ -226,7 +304,12 @@ class Renderer:
             color = PALETTE["success"] if index < stack_size else PALETTE["wall_dark"]
             pygame.draw.rect(surface, color, slot, border_radius=2)
 
-    def _draw_part_icon(self, surface: pygame.Surface, part_kind: PartKind, rect: pygame.Rect) -> None:
+    def _draw_part_icon(self, surface: pygame.Surface, part_kind: PartKind, rect: pygame.Rect) -> bool:
+        sprite = self.part_sprites.get(part_kind)
+        if sprite is not None:
+            self._draw_sprite(surface, sprite, rect)
+            return True
+
         color = PART_COLORS[part_kind]
         scale = min(rect.width, rect.height)
         if part_kind is PartKind.CHASSIS:
@@ -251,8 +334,15 @@ class Renderer:
             pygame.draw.rect(surface, color, barrel, border_radius=max(3, scale // 10))
             breech = pygame.Rect(rect.left + scale // 8, rect.top + scale // 3, scale // 3, scale // 3)
             pygame.draw.rect(surface, PALETTE["text"], breech, border_radius=max(3, scale // 10))
+        return False
 
     def _draw_drone(self, surface: pygame.Surface, rect: pygame.Rect, carried_kind: PartKind | None) -> None:
+        if self.drone_sprite is not None:
+            self._draw_sprite(surface, self.drone_sprite, rect.inflate(-3, -3))
+            if carried_kind is not None:
+                pygame.draw.circle(surface, PART_COLORS[carried_kind], (rect.right - 7, rect.top + 7), max(4, rect.width // 9))
+            return
+
         radius = max(9, rect.width // 3)
         center = rect.center
         pygame.draw.circle(surface, PALETTE["drone_dark"], center, radius + 3)
