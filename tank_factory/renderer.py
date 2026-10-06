@@ -240,12 +240,11 @@ class Renderer:
             base = pygame.Rect(rect.left + scale // 5, rect.top + scale // 2, rect.width - scale * 2 // 5, scale // 4)
             pygame.draw.rect(surface, color, base, border_radius=max(3, scale // 9))
             pygame.draw.circle(surface, color, (rect.centerx, rect.top + scale // 2), max(5, scale // 4))
-            pygame.draw.line(
+            pygame.draw.circle(
                 surface,
-                PALETTE["text"],
-                (rect.centerx + scale // 5, rect.top + scale // 2),
-                (rect.right - scale // 10, rect.top + scale // 2),
-                max(3, scale // 9),
+                PALETTE["wall_dark"],
+                (rect.centerx, rect.top + scale // 2),
+                max(2, scale // 11),
             )
         else:
             barrel = pygame.Rect(rect.left + scale // 6, rect.centery - scale // 8, rect.width - scale // 3, scale // 4)
