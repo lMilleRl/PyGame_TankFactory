@@ -37,7 +37,7 @@ def main() -> None:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                elif event.type == pygame.KEYDOWN and not event.repeat:
+                elif event.type == pygame.KEYDOWN and not getattr(event, "repeat", False):
                     if event.key == pygame.K_ESCAPE:
                         running = False
                     elif screen_state is ScreenState.MENU:
