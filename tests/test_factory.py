@@ -32,6 +32,22 @@ class FactoryMovementTests(unittest.TestCase):
         self.assertEqual(len(factory.parts), 3)
         self.assertEqual(factory.assembly_indices, [])
 
+    def test_default_parts_start_on_conveyors_and_move_with_each_turn(self):
+        factory = Factory()
+
+        self.assertTrue(all(part.position in factory.conveyors for part in factory.parts))
+        self.assertTrue(factory.move_drone(1, 0))
+
+        self.assertEqual(
+            {part.kind: part.position for part in factory.parts},
+            {
+                PartKind.CHASSIS: (3, 2),
+                PartKind.TURRET: (8, 3),
+                PartKind.CANNON: (3, 6),
+            },
+        )
+        self.assertIn("перемещено деталей: 3", factory.message)
+
     def test_arrow_step_moves_drone_exactly_one_cell(self):
         factory = Factory()
         start = factory.drone_position
@@ -167,7 +183,7 @@ class AssemblyTests(unittest.TestCase):
         self.assertEqual(factory.status, FactoryStatus.WON)
         self.assertFalse(factory.move_drone(1, 0))
 
-    def test_default_level_can_be_completed_with_grid_moves(self):
+    def test_default_level_can_be_completed_after_conveyors_stage_all_parts(self):
         factory = Factory()
 
         def move_to(destination):
@@ -180,17 +196,21 @@ class AssemblyTests(unittest.TestCase):
             while factory.drone.grid_y > destination[1]:
                 self.assertTrue(factory.move_drone(0, -1))
 
-        move_to((1, 2))
-        move_to((5, 2))
-        self.assertEqual(factory.get_part_at((5, 2)).kind, PartKind.CHASSIS)
-        self.assertTrue(factory.interact())
-        move_to(factory.assembly_position)
-        self.assertTrue(factory.interact())
+        for _ in range(12):
+            direction_x = 1 if factory.drone.grid_x < 8 else -1
+            self.assertTrue(factory.move_drone(direction_x, 0))
 
-        for part_kind, position in (
-            (PartKind.TURRET, (7, 2)),
-            (PartKind.CANNON, (2, 7)),
-        ):
+        staging_positions = (
+            (PartKind.CHASSIS, (7, 8)),
+            (PartKind.TURRET, (8, 7)),
+            (PartKind.CANNON, (6, 8)),
+        )
+        for part_kind, position in staging_positions:
+            part = factory.get_part_at(position)
+            self.assertIsNotNone(part)
+            self.assertEqual(part.kind, part_kind)
+
+        for _, position in staging_positions:
             move_to(position)
             self.assertTrue(factory.interact())
             move_to(factory.assembly_position)

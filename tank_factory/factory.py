@@ -59,7 +59,7 @@ class Factory:
         self.assembly_stack: list[PartKind] = []
         self.turn_count = 0
         self.status = FactoryStatus.ACTIVE
-        self.message = "Сначала доставьте на платформу шасси."
+        self.message = "Конвейеры везут детали к зонам ожидания у сборочной платформы."
         self._validate_layout()
 
     @staticmethod
@@ -175,10 +175,12 @@ class Factory:
 
     def _finish_turn(self, message: str) -> None:
         self.turn_count += 1
+        moved_parts = self._advance_conveyors()
+        if moved_parts:
+            message = f"{message} По конвейерам перемещено деталей: {moved_parts}."
         self.message = message
-        self._advance_conveyors()
 
-    def _advance_conveyors(self) -> None:
+    def _advance_conveyors(self) -> int:
         """Сдвигает детали одновременно, чтобы результат не зависел от порядка списка."""
         positions = [part.position for part in self.parts]
         intended_moves: dict[int, Cell] = {}
@@ -215,3 +217,4 @@ class Factory:
 
         for index, destination in intended_moves.items():
             self.parts[index].grid_x, self.parts[index].grid_y = destination
+        return len(intended_moves)

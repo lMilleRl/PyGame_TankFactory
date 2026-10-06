@@ -19,15 +19,32 @@ ASSEMBLY_POSITION = (8, 8)
 ASSEMBLY_ORDER = (PartKind.CHASSIS, PartKind.TURRET, PartKind.CANNON)
 INITIAL_PARTS = (
     (PartKind.CHASSIS, 2, 2),
-    (PartKind.TURRET, 7, 2),
-    (PartKind.CANNON, 2, 7),
+    (PartKind.TURRET, 8, 2),
+    (PartKind.CANNON, 2, 6),
 )
 CONVEYOR_LAYOUT = (
     (2, 2, 1, 0),
     (3, 2, 1, 0),
     (4, 2, 1, 0),
-    (6, 4, 0, 1),
-    (6, 5, 0, 1),
+    (5, 2, 1, 0),
+    (6, 2, 1, 0),
+    (7, 2, 0, 1),
+    (7, 3, 0, 1),
+    (7, 4, 0, 1),
+    (7, 5, 0, 1),
+    (7, 6, 0, 1),
+    (7, 7, 0, 1),
+    (8, 2, 0, 1),
+    (8, 3, 0, 1),
+    (8, 4, 0, 1),
+    (8, 5, 0, 1),
+    (8, 6, 0, 1),
+    (2, 6, 1, 0),
+    (3, 6, 1, 0),
+    (4, 6, 1, 0),
+    (5, 6, 0, 1),
+    (5, 7, 0, 1),
+    (5, 8, 1, 0),
 )
 
 PALETTE = {
