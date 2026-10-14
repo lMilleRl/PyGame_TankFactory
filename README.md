@@ -4,7 +4,7 @@
 
 ![Игровое поле «Танковый завод»](screenshots/factory_gameplay.png)
 
-## �-апуск
+## Запуск
 
 Требуется Python 3.12 или новее.
 
@@ -48,7 +48,7 @@ python -m unittest discover -s tests -v
 ```text
 LR1_TankFactory/
 ├── main.py                     # Игровой цикл и обработка клавиш
-├── requirements.txt            # �-ависимость Pygame
+├── requirements.txt            # зависимость Pygame
 ├── assets/                     # Спрайты Aseprite 16 x 16
 │   └── .gitkeep
 ├── tank_factory/
