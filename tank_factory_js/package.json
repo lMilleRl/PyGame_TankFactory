@@ -1,0 +1,9 @@
+{
+  "name": "tank-factory-js",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Lab 4: Tank Factory core in JavaScript",
+  "scripts": {
+    "test": "node selftest.js"
+  }
+}
