@@ -1,5 +1,6 @@
 from collections import Counter
 from collections.abc import Iterable
+from pathlib import Path
 
 from .constants import (
     ASSEMBLY_ORDER,
@@ -12,6 +13,7 @@ from .constants import (
     INITIAL_PARTS,
 )
 from .entities import Cell, Conveyor, Drone, FactoryStatus, Part, PartKind, PART_NAMES
+from .layout import DEFAULT_LAYOUT_PATH, LayoutData, LayoutError, load_layout
 
 
 class Factory:
@@ -61,6 +63,44 @@ class Factory:
         self.status = FactoryStatus.ACTIVE
         self.message = "Конвейеры везут детали к зонам ожидания у сборочной платформы."
         self._validate_layout()
+
+    @classmethod
+    def from_layout_data(cls, layout: LayoutData) -> "Factory":
+        return cls(
+            columns=layout.columns,
+            rows=layout.rows,
+            drone_start=layout.drone_start,
+            assembly_position=layout.assembly_position,
+            parts=layout.parts,
+            conveyors=layout.conveyors,
+            walls=layout.walls,
+        )
+
+    @classmethod
+    def from_layout_file(cls, path: Path | None = None) -> "Factory":
+        """Загружает уровень из factory_layout.txt."""
+        layout_path = Path(path) if path is not None else DEFAULT_LAYOUT_PATH
+        return cls.from_layout_data(load_layout(layout_path))
+
+    @classmethod
+    def create_for_game(cls, path: Path | None = None) -> "Factory":
+        """
+        Старт игры: читает конфиг уровня.
+        При отсутствии или порче файла возвращает встроенную схему и пишет сообщение.
+        """
+        layout_path = Path(path) if path is not None else DEFAULT_LAYOUT_PATH
+        try:
+            factory = cls.from_layout_file(layout_path)
+            factory.message = f"Уровень загружен из {layout_path.name}."
+            return factory
+        except FileNotFoundError:
+            factory = cls()
+            factory.message = f"Файл уровня не найден ({layout_path.name}), использована встроенная схема."
+            return factory
+        except (LayoutError, ValueError, OSError) as exc:
+            factory = cls()
+            factory.message = f"Ошибка формата уровня: {exc}. Использована встроенная схема."
+            return factory
 
     @staticmethod
     def _border_walls(columns: int, rows: int) -> set[Cell]:
