@@ -8,3 +8,5 @@ factory_save.json
 scores.csv
 bot_flight.log
 node_modules/
+sessions/*.json
+!sessions/.gitkeep
