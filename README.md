@@ -90,6 +90,7 @@ PyGame_TankFactory/
 ├── tests/
 ├── tests_bot/
 ├── py_bot/                 # ЛР3 Telegram-бот
+├── tank_factory_js/        # ЛР4 JS-ядро
 ├── sessions/
 └── screenshots/
 ```
