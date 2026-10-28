@@ -88,6 +88,9 @@ PyGame_TankFactory/
 │   ├── persistence.py     # JSON, CSV, logging
 │   └── renderer.py
 ├── tests/
+├── tests_bot/
+├── py_bot/                 # ЛР3 Telegram-бот
+├── sessions/
 └── screenshots/
 ```
 
