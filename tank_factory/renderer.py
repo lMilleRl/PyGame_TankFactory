@@ -119,7 +119,7 @@ class Renderer:
         self._draw_background_grid(surface)
         self._text(surface, "TANK FACTORY", (68, 46), 18, PALETTE["accent"], True)
         self._text(surface, "ТАНКОВЫЙ ЗАВОД", (68, 88), 44, PALETTE["text"], True)
-        self._text(surface, "Лабораторная работа 1  /  вариант 19", (72, 146), 21, PALETTE["text_muted"])
+        self._text(surface, "Лабораторные работы 1-2  /  вариант 19", (72, 146), 21, PALETTE["text_muted"])
 
         preview_panel = pygame.Rect(56, 206, 514, 500)
         self._rounded_panel(surface, preview_panel, PALETTE["panel"], PALETTE["outline"])
@@ -162,7 +162,31 @@ class Renderer:
             PALETTE["text_muted"],
         )
 
-    def draw_victory(self, surface: pygame.Surface, factory: Factory) -> None:
+    def draw_name_input(
+        self,
+        surface: pygame.Surface,
+        factory: Factory,
+        player_name: str,
+        hint: str = "",
+    ) -> None:
+        self.draw_game(surface, factory)
+        overlay = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+        overlay.fill((10, 16, 20, 210))
+        surface.blit(overlay, (0, 0))
+
+        card = pygame.Rect(330, 246, 620, 324)
+        self._rounded_panel(surface, card, PALETTE["panel"], PALETTE["accent"], 18)
+        self._text(surface, "РЕКОРД СМЕНЫ", (640, 290), 16, PALETTE["accent"], True, centered=True)
+        self._text(surface, "Введите имя для таблицы рекордов", (640, 340), 24, PALETTE["text"], True, centered=True)
+        self._text(surface, f"Ходов: {factory.turn_count}", (640, 382), 17, PALETTE["text_muted"], centered=True)
+        self._rounded_panel(surface, pygame.Rect(410, 420, 460, 48), PALETTE["panel_light"], PALETTE["outline"])
+        shown = player_name if player_name else "_"
+        self._text(surface, shown, (640, 444), 22, PALETTE["text"], True, centered=True)
+        if hint:
+            self._text(surface, hint, (640, 486), 14, PALETTE["danger"], centered=True)
+        self._text(surface, "ENTER - сохранить в scores.csv", (640, 530), 15, PALETTE["text_muted"], centered=True)
+
+    def draw_victory(self, surface: pygame.Surface, factory: Factory, player_name: str = "") -> None:
         self.draw_game(surface, factory)
         overlay = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
         overlay.fill((10, 16, 20, 210))
@@ -173,9 +197,12 @@ class Renderer:
         self._text(surface, "СБОРКА ЗАВЕРШЕНА", (640, 298), 16, PALETTE["success"], True, centered=True)
         self._text(surface, "Танк готов к отправке", (640, 354), 32, PALETTE["text"], True, centered=True)
         self._text(surface, "Последовательность [0, 1, 2] соблюдена.", (640, 414), 19, PALETTE["text_muted"], centered=True)
-        self._text(surface, f"Потрачено ходов: {factory.turn_count}", (640, 452), 17, PALETTE["text"], centered=True)
+        turns_line = f"Потрачено ходов: {factory.turn_count}"
+        if player_name:
+            turns_line = f"{player_name}: {turns_line}"
+        self._text(surface, turns_line, (640, 452), 17, PALETTE["text"], centered=True)
         self._rounded_panel(surface, pygame.Rect(442, 500, 396, 44), PALETTE["success"])
-        self._text(surface, "ENTER / R — новая смена     M — меню", (640, 522), 16, PALETTE["background"], True, centered=True)
+        self._text(surface, "ENTER / R - новая смена     M - меню", (640, 522), 16, PALETTE["background"], True, centered=True)
 
     def _draw_board(
         self,
@@ -326,10 +353,10 @@ class Renderer:
         controls_rect = pygame.Rect(PANEL_X + 14, PANEL_TOP + 476, PANEL_WIDTH - 28, 92)
         self._rounded_panel(surface, controls_rect, PALETTE["panel_light"])
         self._text(surface, "УПРАВЛЕНИЕ", (controls_rect.left + 14, controls_rect.top + 8), 12, PALETTE["text_muted"], True)
-        self._text(surface, "СТРЕЛКИ  —  шаг", (controls_rect.left + 14, controls_rect.top + 34), 13)
-        self._text(surface, "SPACE  —  взять / положить", (controls_rect.left + 220, controls_rect.top + 34), 13)
-        self._text(surface, "R  —  заново", (controls_rect.left + 14, controls_rect.top + 59), 13, PALETTE["text_muted"])
-        self._text(surface, "M  —  меню", (controls_rect.left + 220, controls_rect.top + 59), 13, PALETTE["text_muted"])
+        self._text(surface, "СТРЕЛКИ  -  шаг", (controls_rect.left + 14, controls_rect.top + 34), 13)
+        self._text(surface, "SPACE  -  взять / положить", (controls_rect.left + 220, controls_rect.top + 34), 13)
+        self._text(surface, "F5  -  сохранить    F9  -  загрузить", (controls_rect.left + 14, controls_rect.top + 55), 13, PALETTE["text_muted"])
+        self._text(surface, "R  -  заново    M  -  меню", (controls_rect.left + 14, controls_rect.top + 74), 12, PALETTE["text_muted"])
 
     def _wrap(self, text: str, max_width: int, font_size: int) -> list[str]:
         font = self._font(font_size)
