@@ -1,0 +1,9 @@
+{
+  "name": "tank-blueprints",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Lab 6: tank blueprint CRUD with localStorage",
+  "scripts": {
+    "test": "node selftest.js"
+  }
+}
