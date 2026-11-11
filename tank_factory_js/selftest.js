@@ -134,9 +134,10 @@ try {
 check("23 parse real layout", parsedOk && parsed.columns === 10 && parsed.rows === 10);
 const fromFile = FactoryGrid.fromLayoutText(layoutText);
 check("24 factory from layout has 3 parts", fromFile.parts.length === 3);
-check("25 drone at D", fromFile.drone.gridX === 1 && fromFile.drone.gridY === 8);
+check("25 drone at D", fromFile.drone.gridX === 1 && fromFile.drone.gridY === 1);
 fromFile.moveDrone(1, 0);
-check("26 default parts move on conveyors", fromFile.parts.every((p) => p.gridX !== undefined));
+const chassis = fromFile.parts.find((p) => p.kind === "chassis");
+check("26 chassis moved by conveyor", chassis && chassis.gridX === 3 && chassis.gridY === 2);
 
 let badLayout = false;
 try {

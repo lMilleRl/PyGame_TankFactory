@@ -1,4 +1,4 @@
-# ЛР4 - ядро на JavaScript
+# ЛР4. Ядро на JavaScript
 
 Та же логика сетки, конвейеров и сборки, что в Python, без отрисовки. Запуск в Node.
 
@@ -16,14 +16,14 @@ node selftest.js
 ```text
 tank_factory_js/
 ├── package.json
-├── selftest.js          # >= 20 проверок через console.log
+├── selftest.js
 ├── README.md
 └── js/
     ├── FactoryGrid.js
     ├── Drone.js
     ├── Conveyor.js
     ├── PartStack.js
-    └── layout.js        # разбор factory_layout.txt
+    └── layout.js
 ```
 
 Уровень читается из `../factory_layout.txt` (общий с игрой).
@@ -39,3 +39,7 @@ tank_factory_js/
 | `tank_factory/layout.py` | `js/layout.js` |
 
 Сборка считается верной, если `items.join(",") === "chassis,turret,cannon"`.
+
+Каждый успешный ход увеличивает `turnCount` и сдвигает детали на конвейерах.
+
+Последний запуск самопроверки: 28 OK, 0 FAIL.
