@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Танковый завод - виджет</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="layout">
+    <div class="board">
+      <div class="grid" id="grid"></div>
+      <div class="pieces" id="pieces"></div>
+    </div>
+    <aside class="panel">
+      <h1>Танковый завод</h1>
+      <p class="subtitle">Вариант 19, ЛР 5</p>
+      <dl class="hud">
+        <div><dt>Статус</dt><dd id="status">игра</dd></div>
+        <div><dt>Ход</dt><dd id="turns">0</dd></div>
+        <div><dt>Нужна деталь</dt><dd id="needed">шасси</dd></div>
+        <div><dt>Сборка</dt><dd id="stack">-</dd></div>
+      </dl>
+      <p id="message" class="message">Готово к сборке</p>
+      <p class="help">
+        Стрелки - шаг на одну клетку<br>
+        Пробел - взять / положить / установить<br>
+        R - начать заново
+      </p>
+      <div id="result" class="result" hidden>
+        <p>Танк собран</p>
+      </div>
+    </aside>
+  </div>
+  <script type="module" src="js/widget.js"></script>
+</body>
+</html>
