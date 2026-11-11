@@ -1,0 +1,9 @@
+{
+  "name": "tank-factory-site",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Lab 7: Tank Factory Simulation site",
+  "scripts": {
+    "test": "node selftest.js"
+  }
+}
