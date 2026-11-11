@@ -1,0 +1,45 @@
+:root {
+  --bg: #d4d7da;
+  --panel: #eceef0;
+  --head: #b9bec3;
+  --line: #4f565c;
+  --line-soft: #8d949a;
+  --text: #23272b;
+  --muted: #6b7277;
+  --ok: #5b7a4f;
+  --warn: #b07d1c;
+  --bad: #a3261b;
+  --font: "Consolas", "Courier New", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+}
+
+.top {
+  background: var(--head);
+  border-bottom: 3px solid var(--line);
+  padding: 14px 20px;
+}
+
+.top h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.top p {
+  margin: 4px 0 0;
+  color: var(--line);
+  font-size: 13px;
+}
